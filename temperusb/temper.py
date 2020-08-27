@@ -343,6 +343,12 @@ class TemperDevice(object):
             offset = self.lookup_offset(sensor)
             if self.type == TemperType.SI7021:
                 celsius = struct.unpack_from('>h', data, offset)[0] * 175.72 / 65536 - 46.85
+            elif self._device.product == 'TH1000isoV1.5':
+                raw = struct.unpack_from('>h', data, offset)[0]
+                if sensor == 0: # internal temperature
+                    celsius = raw / 256.0
+                else: # TC probe temperature
+                    celsius = raw / 4.0 - 4.0
             else: # fm75 (?) type device
                 celsius = struct.unpack_from('>h', data, offset)[0] / 256.0
             # Apply scaling and offset (if any)
