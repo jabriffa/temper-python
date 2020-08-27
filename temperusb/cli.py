@@ -12,6 +12,8 @@ def parse_args():
     parser = argparse.ArgumentParser(description=descr)
     parser.add_argument("-p", "--disp_ports", action='store_true',
                         help="Display ports")
+    parser.add_argument("-d", "--disp_devices", action='store_true',
+                        help="Display device IDs")
     units = parser.add_mutually_exclusive_group(required=False)
     units.add_argument("-c", "--celsius", action='store_true',
                        help="Quiet: just degrees celcius as decimal")
@@ -83,11 +85,14 @@ def main():
             output = output[0:len(output) - 2]
         else:
             portinfo = ''
+            devinfo = ''
             tempinfo = ''
             huminfo = ''
             for sensor in sorted(reading):
                 if args.disp_ports and portinfo == '':
                     portinfo = " (bus %(bus)s - port %(ports)s)" % reading[sensor]
+                if args.disp_devices and devinfo == '':
+                    devinfo = " [%(product)s]" % reading[sensor]
                 try:
                     tempinfo += '%0.1f°C %0.1f°F; ' % (
                         reading[sensor]['temperature_c'],
@@ -102,7 +107,7 @@ def main():
             tempinfo = tempinfo[0:len(output) - 2]
             huminfo = huminfo[0:len(output) - 2]
 
-            output = 'Device #%i%s: %s %s' % (i, portinfo, tempinfo, huminfo)
+            output = 'Device #%i%s%s: %s %s' % (i, portinfo, devinfo, tempinfo, huminfo)
         print(output)
 
 

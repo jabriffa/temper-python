@@ -352,6 +352,7 @@ class TemperDevice(object):
                 'ports': self.get_ports(),
                 'bus': self.get_bus(),
                 'sensor': sensor,
+                'product': self._device.product,
                 'temperature_f': celsius * 1.8 + 32.0,
                 'temperature_c': celsius,
                 'temperature_mc': celsius * 1000,
