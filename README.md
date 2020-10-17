@@ -16,6 +16,7 @@ via SNMP.
 | `0c45:7401 Microdia`                                         | `RDing TEMPer1F_V1.3`    | Single external sensor, but better precision is possible by using "sensor 2" |
 | `0c45:7401 Microdia`                                         | `RDing TEMPerV1.4`       |                         |
 | `0c45:7402 Microdia TEMPerHUM Temperature & Humidity Sensor` | `RDing TEMPer1F_H1_V1.4` | Single sensor which reports both temperature and relative-humidity |
+| `0c45:7403 Microdia Foot Switch`                             | `RDing TH1000isoV1.5`    | Two sensor device (internal + external) |
 
 # Requirements
 
@@ -59,7 +60,7 @@ with -p option
 
 Which tells you there is a USB hub plugged (internally or externally) on the port 1 of the bus 1 of the host, and your TEMPer device  is on the port 3 of that hub.
 
-## Tell kernel to leave TEMPer alone 
+## Tell kernel to leave TEMPer alone
 
 Regarding errors:
 
@@ -113,8 +114,8 @@ Then restart.
 To check for success, find the bus and device IDs of the devices like this:
 
     pi@raspi-temper1 ~ $ lsusb | grep "0c45:7401"
-    Bus 001 Device 004: ID 0c45:7401 Microdia 
-    Bus 001 Device 005: ID 0c45:7401 Microdia 
+    Bus 001 Device 004: ID 0c45:7401 Microdia
+    Bus 001 Device 005: ID 0c45:7401 Microdia
 
     pi@raspi-temper1 ~ $ ls -l /dev/usb*
     crw------- 1 root root 189, 0 Jan  1  1970 /dev/usbdev1.1
@@ -122,7 +123,7 @@ To check for success, find the bus and device IDs of the devices like this:
     crw------- 1 root root 189, 2 Jan  1  1970 /dev/usbdev1.3
     crw-rw-rwT 1 root root 189, 3 Jan  1  1970 /dev/usbdev1.4
     crw-rw-rwT 1 root root 189, 4 Jan  1  1970 /dev/usbdev1.5
-    pi@raspi-temper1 ~ $ 
+    pi@raspi-temper1 ~ $
 
 Note that `/dev/usbdev1.4` and `/dev/usbdev1.5` have permissions for read/write
 for anyone, including `snmp`. This will work for the passpersist-module running
@@ -178,7 +179,7 @@ To test the reporting, try this (twice if it first reports No Such Instance):
     snmpget -c public -v 2c localhost .1.3.6.1.4.1.318.1.1.1.2.2.2.0 # APC
 
 When NetSNMP starts the instance (upon first `snmpget`), you should see something like this in syslog:
-    
+
     Jan  6 16:01:51 raspi-temper1 temper-python: Found 2 thermometer devices.
     Jan  6 16:01:51 raspi-temper1 temper-python: Initial temperature of device #0: 22.2 degree celsius
     Jan  6 16:01:51 raspi-temper1 temper-python: Initial temperature of device #1: 10.9 degree celsius
@@ -186,7 +187,7 @@ When NetSNMP starts the instance (upon first `snmpget`), you should see somethin
 If you don't even see this, maybe the script has a problem and quits with an exception.
 Try running it manually and mimik a passpersist-request (`->` means you should enter the rest of the line):
 
-    -> sudo temper/snmp.py 
+    -> sudo temper/snmp.py
     -> PING
     <- PONG
     -> get
@@ -297,7 +298,7 @@ Format of calibration lines in `/etc/temper.conf` is:
 
     n-m(.m)* : scale = a, offset = b
 
-where `n` is the USB bus number and `m` is (possibly a chain of) the USB port(s) 
+where `n` is the USB bus number and `m` is (possibly a chain of) the USB port(s)
 which your TEMPer device is plugged on. `a` and `b` are some floating values decided by experiment, we will come back to this later, first let me describe how n and m can be decided for your device.
 
 You will need to use `lsusb` command in usbutils package to decide `n` and `m`. Use `lsusb` with and without `-t` option.
@@ -306,7 +307,7 @@ For example, assume the following outputs;
 
     $ lsusb
     Bus 002 Device 001: ID 1d6b:0002 Linux Foundation 2.0 root hub
-    Bus 001 Device 016: ID 0c45:7401 Microdia 
+    Bus 001 Device 016: ID 0c45:7401 Microdia
     Bus 001 Device 015: ID 1a40:0101 TERMINUS TECHNOLOGY INC. USB-2.0 4-Port HUB
     Bus 001 Device 001: ID 1d6b:0002 Linux Foundation 2.0 root hub
 
@@ -326,7 +327,7 @@ So in this example, `n = 1` and `m = 4.3`; thus the config file should be like
 
     1-4.3: scale = a, offset = b
 
-with `a` and `b` replaced with the actual values which you will need to measure and 
+with `a` and `b` replaced with the actual values which you will need to measure and
 calculate for your own TEMPer device. These values are used in the formula
 
     y = a * x + b
