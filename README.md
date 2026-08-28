@@ -205,7 +205,7 @@ In the below example we will show how to push data to a Mosquitto MQTT broker us
 
 In this example we will publish one specific temperature value for one specific device, for example the temperatue in Celcius for device 0
 To test this, type on your console:
-    
+
     $ /usr/local/bin/temper-poll -c -s 0
     1.9
 
@@ -213,41 +213,41 @@ As you can see because of the "-c" option, temper-poll will present a single tem
 The "-s 0" option makes sure temper-poll only looks at Device #0
 
 We now need to install the Mosquitto client on the device where you installed temper-python. This will provide the mosquitto_pub client which we will use to push towards the MQTT broker
-    
+
      sudo apt-get install mosquitto-clients
 
 To start pushing a value to your MQTT broker, you also need to know the MQTT server IP adress and optionally a username and password.
 A mosquitto_pub command looks something like this:
-    
+
      /usr/bin/mosquitto_pub -h MQTT_IP -m "Some message" -t MQTT_TOPIC -u MQTT_USERNAME -P MQTT_PASSWORD
 
-If you need more paramaters, have a look at the output of 
-    
+If you need more paramaters, have a look at the output of
+
      mosquitto_pub --help
 
 If needed, use the "-d" option for mosquitto_pub, which will print debug output about the connection. A successful connection debug print should look like:
-    
+
      pi@raspberrypi:~ $ /usr/bin/mosquitto_pub -h 10.0.0.* -m "foobar" -t home-assistant/temper_schuur/temperature -u ****** -P ****** -d
      Client mosqpub|2107-raspberryp sending CONNECT
      Client mosqpub|2107-raspberryp received CONNACK (0)
      Client mosqpub|2107-raspberryp sending PUBLISH (d0, q0, r0, m1, 'home-assistant/temper_schuur/temperature', ... (0 bytes))
      Client mosqpub|2107-raspberryp sending DISCONNECT
 
-We will now combine the two using a small bash script called "temper-push-mqtt". First create the script, then make it executable. 
-    
+We will now combine the two using a small bash script called "temper-push-mqtt". First create the script, then make it executable.
+
      sudo touch /usr/local/bin/temper-push-mqtt
      sudo chmod a+x /usr/local/bin/temper-push-mqtt
      sudo nano /usr/local/bin/temper-push-mqtt
 
 The script should contain:
-    
+
      #! /bin/bash
      T=$(/usr/local/bin/temper-poll -c -s 0)
      /usr/bin/mosquitto_pub -h MQTT_IP -m "${T}" -t MQTT_TOPIC -u MQTT_USER -P MQTT_PASSWORD
 
-If you need other parameters for temper-poll, replace them here. Also replace all MQTT_* values with proper values for you local setup. 
+If you need other parameters for temper-poll, replace them here. Also replace all MQTT_* values with proper values for you local setup.
 If you are using Home-Assistant you should add a sensor to you setup by defining it in configuration.yaml:
-    
+
      sensor:
        - platform: mqtt
          name: "Temperatuur Schuur"
@@ -257,11 +257,11 @@ If you are using Home-Assistant you should add a sensor to you setup by defining
 Make sure the state_topic value matches the MQTT_TOPIC value in the temper-push-mqtt script
 
 Finally, to make sure we get periodic data, we create a cron job to run the script every 5 minutes
-    
-     sudo crontab -e 
+
+     sudo crontab -e
 
 To start a new crontab, which should contain
-    
+
      */5 * * * *  /usr/local/bin/temper-push-mqtt  > /var/log/cron_temper-push-mqtt.log 2>&1
 
 The above cronjob will run the temper-push-mqtt script every 5 minutes and will log any issues to a logfile /var/log/cron_temper-push-mqtt.log
@@ -361,3 +361,4 @@ This should work on Python 3.8 and above. It was tested with Python 3.8, 3.9, 3.
 * Python 3 compatibility and rewrite of cli.py to use argparse by Will Furnass (@willfurnass on Github)
 * TEMPerV1.4 support by Christian von Roques (@roques on Github)
 * Pytest and architecture improvement by Dave Thompson (@davet2001 on Github).
+* TEMPerV1.5 support by Johann A. Briffa (@jabriffa on Github)
