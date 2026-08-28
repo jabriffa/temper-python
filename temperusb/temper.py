@@ -19,6 +19,7 @@ from .device_library import DEVICE_LIBRARY, TemperType, TemperConfig
 VIDPIDS = [
     (0x0c45, 0x7401),
     (0x0c45, 0x7402),
+    (0x0c45, 0x7403),
     (0x1a86, 0xe025),
 ]
 REQ_INT_LEN = 8
@@ -340,7 +341,7 @@ class TemperDevice(object):
         # Interpret device response
         for sensor in _sensors:
             offset = self.lookup_offset(sensor)
-            if self.type == TemperType.SI7021: 
+            if self.type == TemperType.SI7021:
                 celsius = struct.unpack_from('>h', data, offset)[0] * 175.72 / 65536 - 46.85
             else: # fm75 (?) type device
                 celsius = struct.unpack_from('>h', data, offset)[0] / 256.0
